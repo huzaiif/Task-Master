@@ -2,6 +2,7 @@ package com.example.taskmaster.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -27,7 +28,7 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         parent: ViewGroup,
         viewType: Int
     ): NoteViewHolder {
-        return noteVieHolder(
+        return noteViewHolder(
             NoteLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
@@ -42,11 +43,12 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         holder.itemBinding.noteDesc.text = currentNote.noteDesc
 
         holder.itemView.setOnClickListener {
-            val direction = homeFragmentDirections.actionHomeFragment
+            val direction = homeFragmentDirections.actionHomeFragmentToEditNoteFragment(currentNote)
+            it.findNavController().navigate(direction)
         }
     }
 
     override fun getItemCount(): Int {
-        TODO("Not yet implemented")
+        return differ.currentList.size
     }
 }
