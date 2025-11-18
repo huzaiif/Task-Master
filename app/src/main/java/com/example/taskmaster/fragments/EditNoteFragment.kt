@@ -1,14 +1,12 @@
 package com.example.taskmaster.fragments
 
-import android.annotation.SuppressLint
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
@@ -21,27 +19,28 @@ import com.example.taskmaster.R
 import com.example.taskmaster.databinding.FragmentEditNoteBinding
 import com.example.taskmaster.model.Note
 import com.example.taskmaster.viewmodel.NoteViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
+class EditNoteFragment : Fragment(), MenuProvider {
 
-@SuppressLint("ResourceType")
-class EditNoteFragment : Fragment(R.id.fragment_edit_note), MenuProvider {
-
-    private var editNoteBinding: FragmentEditNoteBinding? = null
-    private val binding get() = editNoteBinding
+    private var _binding: FragmentEditNoteBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var notesViewModel: NoteViewModel
     private lateinit var currentNote: Note
 
     private val args: EditNoteFragmentArgs by navArgs()
 
+    private var selectedTimeMillis: Long = 0
+    private var selectedPriority: Int = 2  // Default medium
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        editNoteBinding = FragmentEditNoteBinding.inflate(inflater, container, false)
+    ): View {
+        _binding = FragmentEditNoteBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,55 +50,138 @@ class EditNoteFragment : Fragment(R.id.fragment_edit_note), MenuProvider {
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
         notesViewModel = (activity as MainActivity).noteViewModel
-        currentNote = args.note!!
 
-        binding.editNoteTitle.setText(currentNote.noteTitle)
-        binding.editNoteDesc.setText(currentNote.noteDesc)
+        args.note?.let {
+            currentNote = it
+        } ?: return
+
+        selectedTimeMillis = currentNote.taskTime     // preload values
+        selectedPriority = currentNote.priority
+
+        setupUI()
+        setupPriorityDropdown()
+        setupDateTimePicker()
 
         binding.editNoteFab.setOnClickListener {
-            val noteTitle = binding.editNoteTitle.text.toString().trim()
-            val noteDesc = binding.editNoteDesc.text.toString().trim()
-
-            if(noteTitle.isNotEmpty()){
-                val note = Note(currentNote.id, noteTitle, noteDesc)
-                notesViewModel.updateNote(note)
-                view.findNavController().popBackStack(R.id.homeFragment, false)
-
-            } else{
-                Toast.makeText(context, "Please Enter Note title", Toast.LENGTH_SHORT).show()
-            }
+            updateTask(view)
         }
     }
 
-    private fun deleteNote(){
-        AlertDialog.Builder(activity).apply {
-            setTitle("Delete Note")
-            setMessage("Do you want to delete this task?")
-            setPositiveButton("Delete") {_,_ ->
-                notesViewModel.deleteNote(currentNote)
-                Toast.makeText(context, "Note Deleted", Toast.LENGTH_SHORT).show()
-                view?.findNavController()?.popBackStack(R.id.homeFragment, false)
-                setNegativeButton("Cancel", null)
-            }.create().show()
+    /** ---------------- UI PRELOAD ---------------- **/
+    private fun setupUI() {
+        binding.editNoteTitle.setText(currentNote.noteTitle)
+        binding.editNoteDesc.setText(currentNote.noteDesc)
+
+        val formatter = SimpleDateFormat("dd MMM yyyy - hh:mm a", Locale.getDefault())
+        binding.editTaskTimeField.setText(formatter.format(Date(currentNote.taskTime)))
+    }
+
+    /** ---------------- PRIORITY INPUT ---------------- **/
+    private fun setupPriorityDropdown() {
+
+        val items = listOf("High", "Medium", "Low")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, items)
+        binding.editPrioritySpinner.adapter = adapter
+
+        binding.editPrioritySpinner.setSelection(currentNote.priority - 1)
+
+        binding.editPrioritySpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    selectedPriority = position + 1
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+    }
+
+    /** ---------------- DATE & TIME PICKER ---------------- **/
+    private fun setupDateTimePicker() {
+
+        binding.editTaskTimeField.setOnClickListener {
+            val calendar = Calendar.getInstance()
+
+            DatePickerDialog(requireContext(), { _, y, m, d ->
+
+                TimePickerDialog(requireContext(), { _, hour, min ->
+
+                    val selectedCal = Calendar.getInstance()
+                    selectedCal.set(y, m, d, hour, min, 0)
+
+                    selectedTimeMillis = selectedCal.timeInMillis
+
+                    binding.editTaskTimeField.setText(
+                        "$d-${m + 1}-$y   ${String.format("%02d:%02d", hour, min)}"
+                    )
+
+                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE)).show()
         }
+    }
+
+    /** ---------------- SAVE UPDATE ---------------- **/
+    private fun updateTask(view: View) {
+
+        val title = binding.editNoteTitle.text.toString().trim()
+        val desc = binding.editNoteDesc.text.toString().trim()
+
+        if (title.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter title", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val updatedNote = Note(
+            id = currentNote.id,
+            noteTitle = title,
+            noteDesc = desc,
+            taskTime = selectedTimeMillis,
+            priority = selectedPriority
+        )
+
+        notesViewModel.updateNote(updatedNote)
+
+        Toast.makeText(requireContext(), "Task Updated", Toast.LENGTH_SHORT).show()
+        view.findNavController().popBackStack(R.id.homeFragment, false)
+    }
+
+    /** ---------------- DELETE TASK ---------------- **/
+    private fun deleteNote() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Task")
+            .setMessage("Do you want to delete this task?")
+            .setPositiveButton("Delete") { _, _ ->
+                notesViewModel.deleteNote(currentNote)
+                Toast.makeText(requireContext(), "Task Deleted", Toast.LENGTH_SHORT).show()
+                view?.findNavController()?.popBackStack(R.id.homeFragment, false)
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+            .show()
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menu.clear()
-        menuInflater.inflate(R.id.menu_edit_note, menu)
+        menuInflater.inflate(R.menu.menu_edit_note, menu)
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return when(menuItem.itemId){
+        return when (menuItem.itemId) {
             R.id.deleteMenu -> {
                 deleteNote()
                 true
-            }else -> false
+            }
+            else -> false
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        editNoteBinding = null
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

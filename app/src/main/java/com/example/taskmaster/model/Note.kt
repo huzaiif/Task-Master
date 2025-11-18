@@ -8,8 +8,17 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName = "notes")
 @Parcelize
 data class Note(
+
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int = 0,
+
     val noteTitle: String,
-    val noteDesc: String
-): Parcelable
+    val noteDesc: String,
+
+    // NEW FIELD - stores task time (epoch millis)
+    val taskTime: Long,
+
+    // NEW FIELD - 1 = High , 2 = Medium , 3 = Low
+    val priority: Int
+
+) : Parcelable

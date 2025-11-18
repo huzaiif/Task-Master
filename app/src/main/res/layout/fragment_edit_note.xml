@@ -7,61 +7,85 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:padding="12dp"
-        tools:context=".UpdateNoteFragment">
+        tools:context=".fragments.EditNoteFragment">
 
+        <!-- HEADING -->
         <TextView
             android:id="@+id/editNoteHeading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="16dp"
-            android:fontFamily="sans-serif"
-            android:text="Edit Note."
+            android:text="Edit Task"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/red"
-            android:textSize="24sp" />
+            android:layout_marginTop="16dp"
+            android:fontFamily="sans-serif" />
 
+        <!-- TITLE -->
         <EditText
             android:id="@+id/editNoteTitle"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:hint="Enter the title"
-            android:padding="12dp"
-            android:textSize="20sp"
             android:layout_below="@id/editNoteHeading"
-            android:background="@drawable/pink_border"
             android:layout_marginTop="16dp"
+            android:hint="Enter task title"
             android:maxLines="1"
-            android:fontFamily="sans-serif"/>
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:background="@drawable/pink_border"
+            android:fontFamily="sans-serif" />
 
+        <!-- DESCRIPTION -->
         <EditText
             android:id="@+id/editNoteDesc"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="Enter the description"
-            android:gravity="top"
-            android:padding="12dp"
-            android:textSize="18sp"
-            android:fontFamily="sans-serif"
-            android:background="@drawable/pink_border"
+            android:layout_height="120dp"
             android:layout_below="@id/editNoteTitle"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="12dp"
+            android:hint="Enter task description"
+            android:padding="12dp"
+            android:gravity="top"
+            android:textSize="16sp"
+            android:background="@drawable/pink_border"
+            android:fontFamily="sans-serif" />
 
+        <!-- TIME PICKER FIELD -->
+        <EditText
+            android:id="@+id/editTaskTimeField"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@id/editNoteDesc"
+            android:layout_marginTop="12dp"
+            android:hint="Select Task Date Time"
+            android:focusable="false"
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:background="@drawable/pink_border"
+            android:fontFamily="sans-serif" />
+
+        <!-- PRIORITY SPINNER -->
+        <Spinner
+            android:id="@+id/editPrioritySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@id/editTaskTimeField"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/pink_border"
+            android:padding="8dp"
+            android:spinnerMode="dropdown" />
+
+        <!-- SAVE BUTTON -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/editNoteFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="20dp"
-            android:clickable="true"
-            android:backgroundTint="@color/pink"
-            android:tintMode="@color/white"
-            android:src="@drawable/baseline_done_24"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
-            android:contentDescription="editFab" />
+            android:layout_margin="20dp"
+            android:src="@drawable/baseline_done_24"
+            android:backgroundTint="@color/pink"
+            android:contentDescription="Save Task" />
 
     </RelativeLayout>
 </layout>
