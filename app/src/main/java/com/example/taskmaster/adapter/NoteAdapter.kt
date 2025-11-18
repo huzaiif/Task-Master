@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taskmaster.databinding.NoteLayoutBinding
+import com.example.taskmaster.fragments.HomeFragmentDirections
 import com.example.taskmaster.model.Note
 
 class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
@@ -15,7 +16,7 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
     private val differCallback = object : DiffUtil.ItemCallback<Note>(){
         override  fun areItemsTheSame(oldItem: Note, newItem: Note): Boolean {
             return oldItem.id == newItem.id &&
-                    oldItem.notDesc == newItem.noteDesc &&
+                    oldItem.noteDesc == newItem.noteDesc &&
                     oldItem.noteTitle == newItem.noteTitle
         }
 
@@ -28,7 +29,7 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         parent: ViewGroup,
         viewType: Int
     ): NoteViewHolder {
-        return noteViewHolder(
+        return NoteViewHolder(
             NoteLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
@@ -43,7 +44,7 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         holder.itemBinding.noteDesc.text = currentNote.noteDesc
 
         holder.itemView.setOnClickListener {
-            val direction = homeFragmentDirections.actionHomeFragmentToEditNoteFragment(currentNote)
+            val direction = HomeFragmentDirections.actionHomeFragmentToEditNoteFragment(currentNote)
             it.findNavController().navigate(direction)
         }
     }

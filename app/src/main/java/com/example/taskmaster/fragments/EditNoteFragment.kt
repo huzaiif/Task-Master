@@ -1,5 +1,6 @@
 package com.example.taskmaster.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -22,6 +23,7 @@ import com.example.taskmaster.model.Note
 import com.example.taskmaster.viewmodel.NoteViewModel
 
 
+@SuppressLint("ResourceType")
 class EditNoteFragment : Fragment(R.id.fragment_edit_note), MenuProvider {
 
     private var editNoteBinding: FragmentEditNoteBinding? = null
@@ -30,7 +32,7 @@ class EditNoteFragment : Fragment(R.id.fragment_edit_note), MenuProvider {
     private lateinit var notesViewModel: NoteViewModel
     private lateinit var currentNote: Note
 
-    private val args: EditNoteFragmentArgs by navArgs<>()
+    private val args: EditNoteFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
