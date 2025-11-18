@@ -1,7 +1,11 @@
 package com.example.taskmaster.fragments
 
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.*
@@ -16,6 +20,7 @@ import com.example.taskmaster.MainActivity
 import com.example.taskmaster.R
 import com.example.taskmaster.databinding.FragmentAddNoteBinding
 import com.example.taskmaster.model.Note
+import com.example.taskmaster.notification.AlarmReceiver
 import com.example.taskmaster.viewmodel.NoteViewModel
 import java.util.*
 
@@ -68,7 +73,6 @@ class AddNoteFragment : Fragment(), MenuProvider {
                 ) {
                     selectedPriority = position + 1   // 1=High, 2=Medium, 3=Low
                 }
-
                 override fun onNothingSelected(parent: AdapterView<*>) {}
             }
     }
@@ -101,8 +105,9 @@ class AddNoteFragment : Fragment(), MenuProvider {
     }
 
 
-    /** ---------------- SAVE TASK TO DATABASE ---------------- **/
+    /** ---------------- SAVE TASK + NOTIFICATION ---------------- **/
     private fun saveNote(view: View) {
+
         val noteTitle = binding.addNoteTitle.text.toString().trim()
         val noteDesc = binding.addNoteDesc.text.toString().trim()
 
@@ -126,8 +131,35 @@ class AddNoteFragment : Fragment(), MenuProvider {
 
         notesViewModel.addNote(note)
 
+        scheduleNotification(note)
+
         Toast.makeText(requireContext(), "Task Saved", Toast.LENGTH_SHORT).show()
         view.findNavController().popBackStack(R.id.homeFragment, false)
+    }
+
+
+    /** ---------------- SCHEDULE ALARM ---------------- **/
+    private fun scheduleNotification(note: Note) {
+
+        val intent = Intent(requireContext(), AlarmReceiver::class.java).apply {
+            putExtra("TASK_TITLE", note.noteTitle)
+            putExtra("TASK_DESC", note.noteDesc)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            note.hashCode(),               // UNIQUE id protects from overwrite
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            note.taskTime,
+            pendingIntent
+        )
     }
 
 
@@ -146,7 +178,6 @@ class AddNoteFragment : Fragment(), MenuProvider {
             else -> false
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
