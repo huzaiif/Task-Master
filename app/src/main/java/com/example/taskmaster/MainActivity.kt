@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
         // Create notification channel ONCE
         NotificationHelper.createChannel(this)
 
-        // REQUIRED for Android 12+
         askExactAlarmPermission()
 
         setupViewModel()
@@ -36,9 +35,7 @@ class MainActivity : AppCompatActivity() {
         noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]
     }
 
-    /** -----------------------------------------------------------
-     *  ANDROID 12+ → User MUST allow exact alarms to avoid crash
-     *  ----------------------------------------------------------- */
+
     private fun askExactAlarmPermission() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
