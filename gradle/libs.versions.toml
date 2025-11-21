@@ -16,6 +16,8 @@ room = "2.6.1"
 navigation = "2.7.5"
 lifecycle = "2.8.6"
 coroutines = "1.8.1"
+navigationFragmentKtx = "2.9.6"
+navigationUiKtx = "2.9.6"
 
 [libraries]
 # Core Android
@@ -44,6 +46,8 @@ lifecycle-compiler = { group = "androidx.lifecycle", name = "lifecycle-compiler"
 
 # Coroutines
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
