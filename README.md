@@ -46,9 +46,7 @@ The project follows a clean architecture approach:
 
 *Note: On Android 12 (API 31) and higher, the app will request permission to schedule exact alarms for reminders.*
 
-## 📸 Screenshots
 
-*(Add your screenshots here)*
 
 ## 📄 License
 
